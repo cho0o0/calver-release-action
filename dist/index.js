@@ -119,8 +119,9 @@ function run() {
         try {
             const isDryRun = (0, utils_1.toBoolean)(core.getInput('dry_run'));
             const isGenerateReleaseNotes = (0, utils_1.toBoolean)(core.getInput('generate_release_notes'));
+            const timezone = core.getInput('timezone');
             const tags = yield (0, github_1.listTags)();
-            const versionPrefix = (0, utils_1.generateVersionPrefix)();
+            const versionPrefix = (0, utils_1.generateVersionPrefix)(timezone);
             const matchedVersions = tags
                 .map(it => it.name)
                 .filter(it => (0, utils_1.matchVersionPattern)(it))
@@ -166,13 +167,15 @@ function matchVersionPattern(str) {
     return versionPattern.test(str);
 }
 exports.matchVersionPattern = matchVersionPattern;
-function generateVersionPrefix() {
-    const date = new Date();
-    return `${date.getFullYear()}.${date.toLocaleString('default', {
-        month: '2-digit'
-    })}.${date.toLocaleString('default', {
-        day: '2-digit'
-    })}.`;
+function generateVersionPrefix(timezone) {
+    var _a, _b, _c;
+    const dateParts = new Intl.DateTimeFormat('default', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: timezone
+    }).formatToParts(new Date());
+    return `${(_a = dateParts.find(it => it.type === 'year')) === null || _a === void 0 ? void 0 : _a.value}.${(_b = dateParts.find(it => it.type === 'month')) === null || _b === void 0 ? void 0 : _b.value}.${(_c = dateParts.find(it => it.type === 'day')) === null || _c === void 0 ? void 0 : _c.value}.`;
 }
 exports.generateVersionPrefix = generateVersionPrefix;
 function toBoolean(str) {
