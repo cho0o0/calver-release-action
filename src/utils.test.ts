@@ -1,5 +1,5 @@
 import {afterEach, beforeEach, describe, expect, it} from '@jest/globals'
-import {generateVersionPrefix, matchVersionPattern} from '../src/utils'
+import {generateVersionPrefix, matchVersionPattern} from './utils'
 import * as sinon from 'sinon'
 
 describe('matchVersionPattern', () => {
