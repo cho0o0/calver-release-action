@@ -1,17 +1,22 @@
 import * as core from '@actions/core'
 import {createRelease, listTags} from './github'
-import {generateVersionPrefix, matchVersionPattern} from './utils'
+import {generateVersionPrefix, matchVersionPattern, toBoolean} from './utils'
 
 async function run(): Promise<void> {
   try {
-    const isDryRun = /true/i.test(core.getInput('dry_run'))
+    const isDryRun = toBoolean(core.getInput('dry_run'))
+    const isGenerateReleaseNotes = toBoolean(
+      core.getInput('generate_release_notes')
+    )
 
     const tags = await listTags()
     const versionPrefix = generateVersionPrefix()
+
     const matchedVersions = tags
       .map(it => it.name)
       .filter(it => matchVersionPattern(it))
       .filter(it => it.startsWith(versionPrefix))
+
     let newVersion: string
     if (matchedVersions.length > 0) {
       const descSortFn = (a: number, b: number): number => b - a
@@ -26,7 +31,7 @@ async function run(): Promise<void> {
     core.info(`New version: ${newVersion}`)
     core.setOutput('version', newVersion)
     if (!isDryRun) {
-      const releaseUrl = await createRelease(newVersion)
+      const releaseUrl = await createRelease(newVersion, isGenerateReleaseNotes)
       core.setOutput('url', releaseUrl)
     }
   } catch (e) {
