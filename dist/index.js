@@ -47,7 +47,7 @@ function getOctokitSingleton() {
     if (octokitSingleton) {
         return octokitSingleton;
     }
-    const githubToken = core.getInput('github_token');
+    const githubToken = core.getInput('api_token');
     octokitSingleton = (0, github_1.getOctokit)(githubToken);
     return octokitSingleton;
 }
