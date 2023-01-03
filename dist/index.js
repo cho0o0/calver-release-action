@@ -62,12 +62,12 @@ function listTags(fetchedTags = [], page = 1) {
     });
 }
 exports.listTags = listTags;
-function createRelease(tagName, isGenerateReleaseNotes, targetCommitish) {
+function createRelease(tagName, isGenerateReleaseNotes, targetCommitish, releaseName) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = getOctokitSingleton();
         const releaseCommitish = targetCommitish === '' ? github_1.context.sha : targetCommitish;
         core.info(`Create release based on ${releaseCommitish}`);
-        return octokit.rest.repos.createRelease(Object.assign({ tag_name: tagName, name: `Release ver. ${tagName}`, generate_release_notes: isGenerateReleaseNotes, target_commitish: releaseCommitish }, github_1.context.repo));
+        return octokit.rest.repos.createRelease(Object.assign({ tag_name: tagName, name: releaseName, generate_release_notes: isGenerateReleaseNotes, target_commitish: releaseCommitish }, github_1.context.repo));
     });
 }
 exports.createRelease = createRelease;
@@ -123,6 +123,7 @@ function run() {
             const isGenerateReleaseNotes = (0, utils_1.toBoolean)(core.getInput('generate_release_notes'));
             const timezone = core.getInput('timezone');
             const targetCommitish = core.getInput('target_commitish');
+            const releaseTitleFormat = core.getInput('release_title');
             const tags = yield (0, github_1.listTags)();
             const versionPrefix = (0, utils_1.generateVersionPrefix)(timezone);
             const matchedVersions = tags
@@ -142,8 +143,10 @@ function run() {
             }
             core.info(`New version: ${newVersion}`);
             core.setOutput('version', newVersion);
+            const releaseTitle = (0, utils_1.generateReleaseTitle)(releaseTitleFormat, newVersion);
+            core.setOutput('title', releaseTitle);
             if (!isDryRun) {
-                const releaseUrl = yield (0, github_1.createRelease)(newVersion, isGenerateReleaseNotes, targetCommitish);
+                const releaseUrl = yield (0, github_1.createRelease)(newVersion, isGenerateReleaseNotes, targetCommitish, releaseTitle);
                 core.setOutput('url', releaseUrl);
             }
         }
@@ -164,7 +167,7 @@ run();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.toBoolean = exports.generateVersionPrefix = exports.matchVersionPattern = void 0;
+exports.generateReleaseTitle = exports.toBoolean = exports.generateVersionPrefix = exports.matchVersionPattern = void 0;
 const versionPattern = /\d{4}\.\d{2}\.\d{2}.\d{1,5}$/;
 function matchVersionPattern(str) {
     return versionPattern.test(str);
@@ -185,6 +188,10 @@ function toBoolean(str) {
     return /true/i.test(str);
 }
 exports.toBoolean = toBoolean;
+function generateReleaseTitle(titleFormat, version = '') {
+    return titleFormat.replace(/\$\{version}/g, version);
+}
+exports.generateReleaseTitle = generateReleaseTitle;
 
 
 /***/ }),
