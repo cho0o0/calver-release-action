@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import {context, getOctokit} from '@actions/github'
-import {generateReleaseTitle} from './utils'
 
 // Inspired by https://github.com/mathieudutour/github-tag-action
 // Refs:

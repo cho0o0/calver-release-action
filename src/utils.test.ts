@@ -59,7 +59,7 @@ describe('toBoolean', () => {
   it('true string should be converted to true', () => {
     expect(toBoolean('true')).toBe(true)
   })
-  it('returns false string should be converted to false', () => {
+  it('false string should be converted to false', () => {
     expect(toBoolean('false')).toBe(false)
   })
   it('any string except true should be converted to false', () => {
