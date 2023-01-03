@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import {context, getOctokit} from '@actions/github'
+import {generateReleaseTitle} from './utils'
 
 // Inspired by https://github.com/mathieudutour/github-tag-action
 // Refs:
@@ -54,7 +55,8 @@ export async function listTags(
 export async function createRelease(
   tagName: string,
   isGenerateReleaseNotes: boolean,
-  targetCommitish: string
+  targetCommitish: string,
+  releaseName: string
 ): Promise<Release> {
   const octokit = getOctokitSingleton()
   const releaseCommitish =
@@ -62,7 +64,7 @@ export async function createRelease(
   core.info(`Create release based on ${releaseCommitish}`)
   return octokit.rest.repos.createRelease({
     tag_name: tagName,
-    name: `Release ver. ${tagName}`,
+    name: releaseName,
     generate_release_notes: isGenerateReleaseNotes,
     target_commitish: releaseCommitish,
     ...context.repo

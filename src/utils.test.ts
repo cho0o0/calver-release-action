@@ -1,5 +1,10 @@
 import {afterEach, beforeEach, describe, expect, it} from '@jest/globals'
-import {generateVersionPrefix, matchVersionPattern, toBoolean} from './utils'
+import {
+  generateReleaseTitle,
+  generateVersionPrefix,
+  matchVersionPattern,
+  toBoolean
+} from './utils'
 import * as sinon from 'sinon'
 
 describe('matchVersionPattern', () => {
@@ -54,10 +59,30 @@ describe('toBoolean', () => {
   it('true string should be converted to true', () => {
     expect(toBoolean('true')).toBe(true)
   })
-  it('false string should be converted to false', () => {
+  it('returns false string should be converted to false', () => {
     expect(toBoolean('false')).toBe(false)
   })
   it('any string except true should be converted to false', () => {
     expect(toBoolean('any')).toBe(false)
+  })
+})
+
+describe('generateReleaseTitle', () => {
+  it('returns string', () => {
+    expect(generateReleaseTitle('Hello world')).toBe('Hello world')
+  })
+  it('replaces tag name', () => {
+    expect(generateReleaseTitle('Release ${version}', '2023.01.01.1')).toBe(
+      'Release 2023.01.01.1'
+    )
+    expect(generateReleaseTitle('Release ${version}')).toBe('Release ')
+  })
+  it('supports complex pattern', () => {
+    expect(
+      generateReleaseTitle(
+        '[${version}] リリース 📙 ${version}',
+        '2023.01.01.1'
+      )
+    ).toBe('[2023.01.01.1] リリース 📙 2023.01.01.1')
   })
 })
