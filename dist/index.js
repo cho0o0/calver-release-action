@@ -62,10 +62,12 @@ function listTags(fetchedTags = [], page = 1) {
     });
 }
 exports.listTags = listTags;
-function createRelease(tagName, isGenerateReleaseNotes) {
+function createRelease(tagName, isGenerateReleaseNotes, targetCommitish) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = getOctokitSingleton();
-        return octokit.rest.repos.createRelease(Object.assign({ tag_name: tagName, name: `Release ver. ${tagName}`, generate_release_notes: isGenerateReleaseNotes, target_commitish: github_1.context.sha }, github_1.context.repo));
+        const releaseCommitish = targetCommitish === '' ? github_1.context.sha : targetCommitish;
+        core.info(`Create release based on ${releaseCommitish}`);
+        return octokit.rest.repos.createRelease(Object.assign({ tag_name: tagName, name: `Release ver. ${tagName}`, generate_release_notes: isGenerateReleaseNotes, target_commitish: releaseCommitish }, github_1.context.repo));
     });
 }
 exports.createRelease = createRelease;
@@ -120,6 +122,7 @@ function run() {
             const isDryRun = (0, utils_1.toBoolean)(core.getInput('dry_run'));
             const isGenerateReleaseNotes = (0, utils_1.toBoolean)(core.getInput('generate_release_notes'));
             const timezone = core.getInput('timezone');
+            const targetCommitish = core.getInput('target_commitish');
             const tags = yield (0, github_1.listTags)();
             const versionPrefix = (0, utils_1.generateVersionPrefix)(timezone);
             const matchedVersions = tags
@@ -140,7 +143,7 @@ function run() {
             core.info(`New version: ${newVersion}`);
             core.setOutput('version', newVersion);
             if (!isDryRun) {
-                const releaseUrl = yield (0, github_1.createRelease)(newVersion, isGenerateReleaseNotes);
+                const releaseUrl = yield (0, github_1.createRelease)(newVersion, isGenerateReleaseNotes, targetCommitish);
                 core.setOutput('url', releaseUrl);
             }
         }
